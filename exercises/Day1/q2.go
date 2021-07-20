@@ -1,37 +1,41 @@
 package main
 
 import "fmt"
+
 //struct for tree node
 type treeNode struct {
 	value string
 	left *treeNode
 	right *treeNode
 }
+
 //function for preorder traversal
-func preorder(root *treeNode){
+func (root treeNode)preorder() {
 	fmt.Println(root.value)
 	if root.left != nil {
-		preorder(root.left)
+		root.left.preorder()
 	}
 	if root.right != nil {
-		preorder(root.right)
+		root.right.preorder()
 	}
 }
+
 //function for postorder traversal
-func postorder(root *treeNode){
+func (root treeNode)postorder(){
 	if root.left != nil {
-		postorder(root.left)
+		root.left.postorder()
 	}
 	if root.right != nil {
-		postorder(root.right)
+		root.right.postorder()
 	}
 	fmt.Println(root.value)
 }
+
 func main(){
 	//testing
 	tree := treeNode{"+", &treeNode{"a",nil,nil},&treeNode{"-",&treeNode{"b",nil,nil},&treeNode{"c",nil,nil}} }
 	fmt.Println("preorder")
-	preorder(&tree)
+	tree.preorder()
 	fmt.Println("postorder")
-	postorder(&tree)
+	tree.postorder()
 }

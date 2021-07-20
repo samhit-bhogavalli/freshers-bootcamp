@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-//interface for all types of employes
+//interface for all types of Employee
 type Employee interface {
 	calculateSalary() int
 }
@@ -11,6 +11,7 @@ type Employee interface {
 type fullTime struct {
 	basic int
 }
+
 //salary for fulltime employee
 func (f fullTime) calculateSalary() int {
 	return 28*f.basic
@@ -20,6 +21,7 @@ func (f fullTime) calculateSalary() int {
 type contractor struct {
 	basic int
 }
+
 //salary for contract employee
 func (c contractor) calculateSalary() int {
 	return 28*c.basic
@@ -30,16 +32,17 @@ type freelancer struct {
 	basic int
 	hours int
 }
+
 //salary for freelancer
 func (f freelancer) calculateSalary() int {
 	return f.basic*f.hours
 }
 
 //function for calculating total expense for the employer
-func totalExpence(employes []Employee) int {
+func totalExpense(employees ...Employee) int {
 	total := 0
-	for i := 0; i < len(employes); i++ {
-		total += employes[i].calculateSalary()
+	for _ , employee := range employees {
+		total += employee.calculateSalary()
 	}
 	return total
 }
@@ -49,7 +52,7 @@ func main(){
 	emp1 := fullTime{500}
 	emp2 := contractor{100}
 	emp3 := freelancer{10,20}
-	var employes = []Employee{emp1, emp2, emp3}
-	fmt.Println(totalExpence(employes))
+	var employees = []Employee{emp1, emp2, emp3}
+	fmt.Println(totalExpense(employees[0], employees[1], employees[2]))
 
 }
