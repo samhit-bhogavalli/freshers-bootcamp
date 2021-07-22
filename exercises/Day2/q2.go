@@ -7,34 +7,44 @@ import (
 	"time"
 )
 
-//function to ask students and get their replies
-func askStudent(waitGroup *sync.WaitGroup, ratings chan int) {
-	time.Sleep(time.Millisecond * time.Duration(rand.Intn(1000)))
-	ratings <- rand.Intn(1000)
-	waitGroup.Done()
+//structure for teacher
+type teacher struct {
+	totalRating int
 }
 
-func main() {
-	var waitGroup sync.WaitGroup
-	ratings := make(chan int, 5)
-	for i := 0; i < 200; i++ {
-		waitGroup.Add(1)
-		go askStudent(&waitGroup, ratings)
+//function for asking student for rating
+func (t *teacher) askStudent(waitGroup *sync.WaitGroup, ratings chan int) {
+	time.Sleep(time.Millisecond * time.Duration(rand.Intn(1000)))
+	ratings <- rand.Intn(1000)
+	defer waitGroup.Done()
+}
+
+//function for reading answer from student
+func (t *teacher) listenStudent(done chan bool, ratings chan int) {
+	for rating := range ratings {
+		t.totalRating += rating
 	}
+	done <- true
+}
 
-	totalRating := 0
-	count := 0
+//function to calculate total rating
+func (t *teacher) calculateRating(noOfStudents int) {
+	var waitGroup sync.WaitGroup
+	ratings := make(chan int)
+	for i := 0; i < noOfStudents; i++ {
+		waitGroup.Add(1)
+		go t.askStudent(&waitGroup, ratings)
+	}
 	done := make(chan bool)
-	go func() {
-		for rating := range ratings {
-			totalRating += rating
-			count++
-		}
-		done <- true
-	}()
-
+	go t.listenStudent(done, ratings)
 	waitGroup.Wait()
 	close(ratings)
 	<-done
-	fmt.Println(totalRating / count)
+}
+
+func main() {
+
+	sir := teacher{}
+	sir.calculateRating(200)
+	fmt.Println(sir.totalRating / 200)
 }
