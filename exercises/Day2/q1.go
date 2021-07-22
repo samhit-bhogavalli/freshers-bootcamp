@@ -5,30 +5,43 @@ import (
 	"sync"
 )
 
+type counter struct {
+	frequency map[string]int
+	mutex     sync.Mutex
+	workers   int
+	waitGroup sync.WaitGroup
+}
+
 //function for counting alphabets in a job
-func countAlphabets(jobs chan string, done chan bool, count map[string]int, mutex *sync.Mutex) {
+func (cnt *counter) worker(jobs chan string) {
 	for job := range jobs {
 		for _, rune := range job {
-			mutex.Lock()
-			count[string(rune)]++
-			mutex.Unlock()
+			cnt.mutex.Lock()
+			cnt.frequency[string(rune)]++
+			cnt.mutex.Unlock()
 		}
 	}
-	done <- true
+	defer cnt.waitGroup.Done()
+}
+
+//a function which takes slice of strings and calculates frequency
+func (cnt *counter) getCount(input []string) {
+	jobs := make(chan string, 3)
+	for i := 0; i < cnt.workers; i++ {
+		cnt.waitGroup.Add(1)
+		go cnt.worker(jobs)
+	}
+	for _, val := range input {
+		jobs <- val
+	}
+	close(jobs)
+	cnt.waitGroup.Wait()
 }
 
 func main() {
 	//testing
 	input := []string{"quick", "quick", "quick", "quick", "quick", "quick"}
-	jobs := make(chan string, 5)
-	done := make(chan bool)
-	count := make(map[string]int)
-	var mutex sync.Mutex
-	go countAlphabets(jobs, done, count, &mutex)
-	for _, val := range input {
-		jobs <- val
-	}
-	close(jobs)
-	<-done
-	fmt.Println(count)
+	frequencyCounter := counter{make(map[string]int), sync.Mutex{}, 3, sync.WaitGroup{}}
+	frequencyCounter.getCount(input)
+	fmt.Println(frequencyCounter.frequency)
 }
