@@ -14,9 +14,9 @@ type teacher struct {
 
 //function for asking student for rating
 func (t *teacher) askStudent(waitGroup *sync.WaitGroup, ratings chan int) {
+	defer waitGroup.Done()
 	time.Sleep(time.Millisecond * time.Duration(rand.Intn(1000)))
 	ratings <- rand.Intn(1000)
-	defer waitGroup.Done()
 }
 
 //function for reading answer from student
