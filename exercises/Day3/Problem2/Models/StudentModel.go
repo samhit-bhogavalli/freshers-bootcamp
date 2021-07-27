@@ -1,11 +1,27 @@
 package Models
 
+import "gorm.io/gorm"
+
 type Student struct {
-	ID        uint   `json:"id"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	DOB       string `json:"dob"`
-	Address   string `json:"address"`
-	Subject   string `json:"subject"`
-	Marks     int    `json:"marks"`
+	gorm.Model
+	FirstName string
+	LastName  string
+	DOB       string
+	Address   string
+	Marks     []Marks
+}
+
+func (s *Student) TableName() string {
+	return "student"
+}
+
+type Marks struct {
+	gorm.Model
+	StudentID uint
+	Subject   string
+	Score     int
+}
+
+func (m *Marks) TableName() string {
+	return "marks"
 }
